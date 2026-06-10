@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ConnectHub — Rede Social</title>
+  <style>
+    /* ===== RESET & VARIÁVEIS ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f0f13;
+      --surface:   #1a1a24;
+      --surface2:  #22223a;
+      --border:    #2e2e45;
+      --accent:    #7c5cfc;
+      --accent2:   #c45cfc;
+      --text:      #e8e8f0;
+      --muted:     #7a7a9a;
+      --danger:    #fc5c7c;
+      --success:   #5cfca0;
+      --radius:    14px;
+      --shadow:    0 4px 24px rgba(0,0,0,.45);
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; border: none; background: none; color: inherit; font: inherit; }
+    input, textarea { font: inherit; color: inherit; }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    /* ===== TELA DE LOGIN ===== */
+    #auth-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 60% 40%, #1e1040 0%, var(--bg) 70%);
+    }
+
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: var(--shadow);
+    }
+
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .auth-logo .logo-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .auth-logo h1 { font-size: 1.6rem; font-weight: 700; }
+    .auth-logo p  { color: var(--muted); font-size: .9rem; margin-top: 4px; }
+
+    .auth-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-weight: 600;
+      text-align: center;
+      color: var(--muted);
+      transition: all .2s;
+    }
+
+    .auth-tab.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .auth-form { display: flex; flex-direction: column; gap: 14px; }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: .85rem; color: var(--muted); font-weight: 600; }
+
+    .form-group input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .form-group input:focus { border-color: var(--accent); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-top: 4px;
+      transition: opacity .2s, transform .1s;
+    }
+
+    .btn-primary:hover { opacity: .9; }
+    .btn-primary:active { transform: scale(.98); }
+
+    .auth-error {
+      background: rgba(252,92,124,.15);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: .85rem;
+      display: none;
+    }
+
+    /* ===== LAYOUT PRINCIPAL ===== */
+    #app-screen { display: none; min-height: 100vh; }
+
+    /* NAVBAR */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(26,26,36,.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    .nav-logo .dot {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .nav-search {
+      flex: 1;
+      max-width: 320px;
+      position: relative;
+    }
+
+    .nav-search input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 8px 16px 8px 38px;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .nav-search input:focus { border-color: var(--accent); }
+
+    .nav-search .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .nav-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      position: relative;
+      transition: background .2s;
+    }
+
+    .nav-btn:hover { background: var(--border); }
+
+    .badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: var(--danger);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    /* LAYOUT PRINCIPAL */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr 300px;
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    /* SIDEBAR ESQUERDA */
+    .sidebar-left {
+      position: sticky;
+      top: 84px;
+      height: fit-content;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: .95rem;
+      font-weight: 500;
+      color: var(--muted);
+      transition: all .2s;
+      cursor: pointer;
+    }
+
+    .sidebar-item:hover, .sidebar-item.active {
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .sidebar-item.active { color: var(--accent); }
+    .sidebar-item .icon { font-size: 20px; width: 24px; text-align: center; }
+
+    .sidebar-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 8px 0;
+    }
+
+    /* FEED */
+    .feed { display: flex; flex-direction: column; gap: 16px; }
+
+    /* CRIAR POST */
+    .create-post {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .create-post-top {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 2px solid var(--border);
+    }
+
+    .avatar-sm {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .create-post textarea {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      resize: none;
+      min-height: 80px;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .create-post textarea:focus { border-color: var(--accent); }
+
+    .create-post-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .create-post-tools { display: flex; gap: 8px; }
+
+    .tool-btn {
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: .85rem;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .2s;
+    }
+
+    .tool-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+    .btn-post {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: .9rem;
+      font-weight: 700;
+      transition: opacity .2s;
+    }
+
+    .btn-post:hover { opacity: .85; }
+
+    /* CARD DE POST */
+    .post-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      animation: fadeIn .3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .post-user-info { flex: 1; }
+    .post-user-info .name { font-weight: 700; font-size: .95rem; }
+    .post-user-info .meta { color: var(--muted); font-size: .8rem; margin-top: 2px; }
+
+    .post-menu {
+      color: var(--muted);
+      font-size: 20px;
+      padding: 4px 8px;
+      border-radius: 8px;
+      transition: background .2s;
+    }
+
+    .post-menu:hover { background: var(--surface2); color: var(--text); }
+
+    .post-content { font-size: .95rem; line-height: 1.6; margin-bottom: 14px; }
+
+    .post-image {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      max-height: 400px;
+      object-fit: cover;
+    }
+
+    .post-tag {
+      display: inline-block;
+      background: rgba(124,92,252,.15);
+      color: var(--accent);
+      border-radius: 99px;
+      padding: 2px 10px;
+      font-size: .8rem;
+      font-weight: 600;
+      margin-right: 6px;
+      margin-bottom: 10px;
+    }
+
+    .post-actions {
+      display: flex;
+      gap: 4px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: .85rem;
+      color: var(--muted);
+      transition: all .2s;
+    }
+
+    .action-btn:hover { background: var(--surface2); color: var(--text); }
+    .action-btn.liked { color: var(--danger); }
+    .action-btn.liked .heart { animation: heartPop .3s ease; }
+
+    @keyframes heartPop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.4); }
+      100% { transform: scale(1); }
+    }
+
+    /* COMENTÁRIOS */
+    .comments-section {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      display: none;
+    }
+
+    .comments-section.open { display: block; }
+
+    .comment-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      animation: fadeIn .2s ease;
+    }
+
+    .comment-bubble {
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 10px 12px;
+      flex: 1;
+    }
+
+    .comment-bubble .c-name { font-weight: 700; font-size: .85rem; }
+    .comment-bubble .c-text { font-size: .88rem; margin-top: 3px; line-height: 1.5; }
+    .comment-bubble .c-time { font-size: .75rem; color: var(--muted); margin-top: 4px; }
+
+    .comment-input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .comment-input-row input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 9px 16px;
+      font-size: .88rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .comment-input-row input:focus { border-color: var(--accent); }
+
+    .send-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      transition: opacity .2s;
+    }
+
+    .send-btn:hover { opacity: .85; }
+
+    /* SIDEBAR DIREITA */
+    .sidebar-right {
+      position: sticky;
+      top: 84px;
+      height: fit-content;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .widget {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+
+    .widget-title {
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 14px;
+    }
+
+    /* SUGESTÕES */
+    .suggestion-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .suggestion-item:last-child { margin-bottom: 0; }
+
+    .suggestion-info { flex: 1; }
+    .suggestion-info .s-name { font-weight: 600; font-size: .9rem; }
+    .suggestion-info .s-meta { font-size: .78rem; color: var(--muted); }
+
+    .btn-follow {
+      background: rgba(124,92,252,.15);
+      color: var(--accent);
+      border: 1px solid rgba(124,92,252,.3);
+      border-radius: 8px;
+      padding: 5px 14px;
+      font-size: .82rem;
+      font-weight: 700;
+      transition: all .2s;
+    }
+
+    .btn-follow:hover { background: var(--accent); color: #fff; }
+    .btn-follow.following { background: var(--surface2); color: var(--muted); border-color: var(--border); }
+
+    /* TRENDING */
+    .trend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: color .2s;
+    }
+
+    .trend-item:last-child { border-bottom: none; }
+    .trend-item:hover .t-tag { color: var(--accent); }
+
+    .t-num { font-size: .75rem; color: var(--muted); width: 18px; }
+    .t-info { flex: 1; }
+    .t-tag { font-weight: 700; font-size: .9rem; }
+    .t-count { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+
+    /* PERFIL CARD */
+    .profile-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .profile-banner {
+      height: 80px;
+      background: linear-gradient(135deg, #3a1c8c, #7c5cfc, #c45cfc);
+    }
+
+    .profile-card-body { padding: 0 18px 18px; }
+
+    .profile-card-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 3px solid var(--surface);
+      margin-top: -32px;
+      object-fit: cover;
+    }
+
+    .profile-card-name { font-weight: 800; font-size: 1rem; margin-top: 8px; }
+    .profile-card-handle { color: var(--muted); font-size: .85rem; }
+    .profile-card-bio { font-size: .85rem; margin-top: 8px; line-height: 1.5; }
+
+    .profile-stats {
+      display: flex;
+      gap: 16px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .stat { text-align: center; }
+    .stat .n { font-weight: 800; font-size: 1.1rem; }
+    .stat .l { font-size: .75rem; color: var(--muted); }
+
+    /* TOAST */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: .9rem;
+      box-shadow: var(--shadow);
+      animation: slideIn .3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast.success { border-color: var(--success); }
+    .toast.error   { border-color: var(--danger); }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.7);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+    }
+
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--shadow);
+      transform: scale(.95);
+      transition: transform .2s;
+    }
+
+    .modal-overlay.open .modal { transform: scale(1); }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h2 { font-size: 1.1rem; font-weight: 700; }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--muted);
+      transition: all .2s;
+    }
+
+    .modal-close:hover { background: var(--border); color: var(--text); }
+
+    /* STORIES */
+    .stories-row {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+
+    .stories-row::-webkit-scrollbar { display: none; }
+
+    .story-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .story-ring {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      padding: 2px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    }
+
+    .story-ring.seen { background: var(--border); }
+
+    .story-ring img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--surface);
+    }
+
+    .story-name { font-size: .72rem; color: var(--muted); max-width: 60px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .add-story {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 2px dashed var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .add-story:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .main-layout { grid-template-columns: 220px 1fr; }
+      .sidebar-right { display: none; }
+    }
+
+    @media (max-width: 768px) {
+      .main-layout { grid-template-columns: 1fr; }
+      .sidebar-left { display: none; }
+      .nav-search { display: none; }
+    }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state .e-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p { font-size: .95rem; }
+
+    /* ONLINE DOT */
+    .online-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--success);
+      border-radius: 50%;
+      border: 2px solid var(--surface);
+      position: absolute;
+      bottom: 0;
+      right: 0;
+    }
+
+    .avatar-wrap { position: relative; display: inline-block; }
+
+    /* SHARE COUNT */
+    .share-count { font-size: .8rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<!-- ==================== TELA DE LOGIN ==================== -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-icon">🌐</div>
+      <h1>ConnectHub</h1>
+      <p>Conecte-se com o mundo</p>
+    </div>
+
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Entrar</div>
+      <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Criar conta</div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="form-login" class="auth-form">
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="login-email" placeholder="seu@email.com" />
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="login-password" placeholder="••••••••" />
+      </div>
+      <div class="auth-error" id="login-error"></div>
+      <button class="btn-primary" onclick="doLogin()">Entrar</button>
+    </div>
+
+    <!-- REGISTRO -->
+    <div id="form-register" class="auth-form" style="display:none">
+      <div class="form-group">
+        <label>Nome completo</label>
+        <input type="text" id="reg-name" placeholder="Seu nome" />
+      </div>
+      <div class="form-group">
+        <label>Usuário</label>
+        <input type="text" id="reg-user" placeholder="@usuario" />
+      </div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="reg-email" placeholder="seu@email.com" />
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" />
+      </div>
+      <div class="auth-error" id="reg-error"></div>
+      <button class="btn-primary" onclick="doRegister()">Criar conta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== APP ==================== -->
+<div id="app-screen">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-logo">
+      <span class="dot">🌐</span>
+      ConnectHub
+    </div>
+    <div class="nav-search">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Pesquisar..." id="search-input" oninput="handleSearch(this.value)" />
+    </div>
+    <div class="nav-actions">
+      <button class="nav-btn" onclick="openNotifications()" title="Notificações">
+        🔔
+        <span class="badge" id="notif-badge">3</span>
+      </button>
+      <button class="nav-btn" onclick="openMessages()" title="Mensagens">
+        💬
+        <span class="badge" id="msg-badge">2</span>
+      </button>
+      <div class="avatar-wrap">
+        <img class="nav-avatar" id="nav-avatar-img" src="" alt="Meu perfil" onclick="openProfile()" />
+        <span class="online-dot"></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- LAYOUT PRINCIPAL -->
+  <div class="main-layout">
+
+    <!-- SIDEBAR ESQUERDA -->
+    <aside class="sidebar-left">
+      <div class="sidebar-item active" onclick="setActive(this, 'home')">
+        <span class="icon">🏠</span> Início
+      </div>
+      <div class="sidebar-item" onclick="setActive(this, 'explore')">
+        <span class="icon">🔍</span> Explorar
+      </div>
+      <div class="sidebar-item" onclick="setActive(this, 'notifications')">
+        <span class="icon">🔔</span> Notificações
+      </div>
+      <div class="sidebar-item" onclick="setActive(this, 'messages')">
+        <span class="icon">💬</span> Mensagens
+      </div>
+      <div class="sidebar-item" onclick="setActive(this, 'bookmarks')">
+        <span class="icon">🔖</span> Salvos
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-item" onclick="openProfile()">
+        <span class="icon">👤</span> Perfil
+      </div>
+      <div class="sidebar-item" onclick="doLogout()">
+        <span class="icon">🚪</span> Sair
+      </div>
+    </aside>
+
+    <!-- FEED -->
+    <main class="feed" id="feed">
+
+      <!-- STORIES -->
+      <div class="post-card" style="padding: 16px 20px;">
+        <div class="stories-row" id="stories-row">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;">
+            <div class="add-story" onclick="showToast('Criar story em breve!', 'success')">+</div>
+            <span class="story-name">Seu story</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CRIAR POST -->
+      <div class="create-post">
+        <div class="create-post-top">
+          <img class="avatar" id="create-avatar" src="" alt="Avatar" />
+          <textarea id="post-textarea" placeholder="No que você está pensando?"></textarea>
+        </div>
+        <div class="create-post-actions">
+          <div class="create-post-tools">
+            <button class="tool-btn" onclick="showToast('Adicionar foto em breve!', 'success')">📷 Foto</button>
+            <button class="tool-btn" onclick="showToast('Adicionar vídeo em breve!', 'success')">🎬 Vídeo</button>
+            <button class="tool-btn" onclick="showToast('Adicionar localização em breve!', 'success')">📍 Local</button>
+          </div>
+          <button class="btn-post" onclick="createPost()">Publicar</button>
+        </div>
+      </div>
+
+      <!-- POSTS (gerados via JS) -->
+      <div id="posts-container"></div>
+
+    </main>
+
+    <!-- SIDEBAR DIREITA -->
+    <aside class="sidebar-right">
+
+      <!-- PERFIL RESUMIDO -->
+      <div class="profile-card" id="mini-profile">
+        <div class="profile-banner"></div>
+        <div class="profile-card-body">
+          <img class="profile-card-avatar" id="mini-avatar" src="" alt="Avatar" />
+          <div class="profile-card-name" id="mini-name">—</div>
+          <div class="profile-card-handle" id="mini-handle">@—</div>
+          <div class="profile-card-bio">Explorando o mundo digital ✨</div>
+          <div class="profile-stats">
+            <div class="stat"><div class="n" id="stat-posts">0</div><div class="l">Posts</div></div>
+            <div class="stat"><div class="n">248</div><div class="l">Seguindo</div></div>
+            <div class="stat"><div class="n">1.2k</div><div class="l">Seguidores</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUGESTÕES -->
+      <div class="widget">
+        <div class="widget-title">Quem seguir</div>
+        <div id="suggestions-list"></div>
+      </div>
+
+      <!-- TRENDING -->
+      <div class="widget">
+        <div class="widget-title">Tendências</div>
+        <div id="trending-list"></div>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+<!-- ==================== MODAL PERFIL ==================== -->
+<div class="modal-overlay" id="profile-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Meu Perfil</h2>
+      <button class="modal-close" onclick="closeModal('profile-modal')">✕</button>
+    </div>
+    <div style="text-align:center; margin-bottom:20px;">
+      <img id="modal-avatar" src="" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--accent);object-fit:cover;" />
+      <div style="font-weight:800;font-size:1.2rem;margin-top:10px;" id="modal-name">—</div>
+      <div style="color:var(--muted);font-size:.9rem;" id="modal-handle">@—</div>
+    </div>
+    <div class="profile-stats" style="justify-content:center;gap:32px;">
+      <div class="stat"><div class="n" id="modal-posts">0</div><div class="l">Posts</div></div>
+      <div class="stat"><div class="n">248</div><div class="l">Seguindo</div></div>
+      <div class="stat"><div class="n">1.2k</div><div class="l">Seguidores</div></div>
+    </div>
+    <button class="btn-primary" style="margin-top:20px;width:100%;" onclick="closeModal('profile-modal')">Fechar</button>
+  </div>
+</div>
+
+<!-- ==================== MODAL NOTIFICAÇÕES ==================== -->
+<div class="modal-overlay" id="notif-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Notificações</h2>
+      <button class="modal-close" onclick="closeModal('notif-modal')">✕</button>
+    </div>
+    <div id="notif-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+  </div>
+</div>
+
+<!-- ==================== MODAL MENSAGENS ==================== -->
+<div class="modal-overlay" id="msg-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Mensagens</h2>
+      <button class="modal-close" onclick="closeModal('msg-modal')">✕</button>
+    </div>
+    <div id="msg-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+  </div>
+</div>
+
+<!-- ==================== TOAST ==================== -->
+<div id="toast-container"></div>
+
+<!-- ==================== JAVASCRIPT ==================== -->
+<script>
+  /* ===== DADOS SIMULADOS ===== */
+  const USERS_DB = [
+    { id: 1, name: 'Ana Lima',     handle: 'analima',   email: 'ana@demo.com',   password: '123456', avatar: 'https://i.pravatar.cc/150?img=47' },
+    { id: 2, name: 'Carlos Melo',  handle: 'carlosmelo',email: 'carlos@demo.com',password: '123456', avatar: 'https://i.pravatar.cc/150?img=12' },
+    { id: 3, name: 'Beatriz Souza',handle: 'beasouza',  email: 'bea@demo.com',   password: '123456', avatar: 'https://i.pravatar.cc/150?img=32' },
+  ];
+
+  const DEMO_POSTS = [
+    {
+      id: 101, userId: 2, text: 'Acabei de terminar meu novo projeto de design! 🎨 Foram semanas de trabalho intenso, mas o resultado ficou incrível. O que vocês acham?',
+      tags: ['#design', '#criatividade'], image: 'https://picsum.photos/seed/post1/600/350',
+      likes: 142, comments: [], shares: 18, time: '2h atrás', liked: false
+    },
+    {
+      id: 102, userId: 3, text: 'Bom dia, ConnectHub! ☀️ Começando a semana com muito café e boas energias. Qual é o ritual de manhã de vocês?',
+      tags: ['#bomdia', '#café'], image: null,
+      likes: 87, comments: [], shares: 5, time: '4h atrás', liked: false
+    },
+    {
+      id: 103, userId: 2, text: 'Dica de hoje: nunca subestime o poder de uma boa noite de sono. Produtividade nas alturas depois de dormir 8h! 💤',
+      tags: ['#produtividade', '#saúde'], image: 'https://picsum.photos/seed/post3/600/350',
+      likes: 213, comments: [], shares: 42, time: '1d atrás', liked: false
+    },
+    {
+      id: 104, userId: 3, text: 'Acabei de ler um livro incrível sobre inteligência artificial. Recomendo demais para quem quer entender o futuro da tecnologia! 📚🤖',
+      tags: ['#IA', '#tecnologia', '#leitura'], image: null,
+      likes: 56, comments: [], shares: 11, time: '2d atrás', liked: false
+    },
+  ];
+
+  const DEMO_COMMENTS = [
+    { user: 'Carlos Melo', avatar: 'https://i.pravatar.cc/150?img=12', text: 'Que incrível! Parabéns pelo trabalho 🔥', time: '1h atrás' },
+    { user: 'Beatriz Souza', avatar: 'https://i.pravatar.cc/150?img=32', text: 'Adorei! Pode compartilhar mais detalhes?', time: '45min atrás' },
+  ];
+
+  const SUGGESTIONS = [
+    { id: 4, name: 'Lucas Ferreira', handle: 'lucasf',   avatar: 'https://i.pravatar.cc/150?img=8',  meta: '32 amigos em comum' },
+    { id: 5, name: 'Marina Costa',  handle: 'marinac',  avatar: 'https://i.pravatar.cc/150?img=25', meta: 'Segue você' },
+    { id: 6, name: 'Rafael Nunes',  handle: 'rafanunes', avatar: 'https://i.pravatar.cc/150?img=15', meta: '5 amigos em comum' },
+  ];
+
+  const TRENDING = [
+    { tag: '#ConnectHub', count: '12.4k posts' },
+    { tag: '#Tecnologia', count: '8.9k posts' },
+    { tag: '#Design',     count: '6.1k posts' },
+    { tag: '#IA',         count: '5.7k posts' },
+    { tag: '#Brasil',     count: '4.2k posts' },
+  ];
+
+  const STORIES_DATA = [
+    { name: 'Carlos',  avatar: 'https://i.pravatar.cc/150?img=12', seen: false },
+    { name: 'Beatriz', avatar: 'https://i.pravatar.cc/150?img=32', seen: false },
+    { name: 'Lucas',   avatar: 'https://i.pravatar.cc/150?img=8',  seen: true  },
+    { name: 'Marina',  avatar: 'https://i.pravatar.cc/150?img=25', seen: false },
+    { name: 'Rafael',  avatar: 'https://i.pravatar.cc/150?img=15', seen: true  },
+  ];
+
+  const NOTIFICATIONS = [
+    { icon: '❤️', text: '<b>Carlos Melo</b> curtiu sua publicação.', time: '5min atrás' },
+    { icon: '💬', text: '<b>Beatriz Souza</b> comentou: "Incrível!"', time: '20min atrás' },
+    { icon: '👤', text: '<b>Lucas Ferreira</b> começou a seguir você.', time: '1h atrás' },
+    { icon: '🔁', text: '<b>Marina Costa</b> compartilhou seu post.', time: '3h atrás' },
+  ];
+
+  const MESSAGES = [
+    { name: 'Carlos Melo',   avatar: 'https://i.pravatar.cc/150?img=12', text: 'Oi! Tudo bem?', time: '10min' },
+    { name: 'Beatriz Souza', avatar: 'https://i.pravatar.cc/150?img=32', text: 'Adorei o post!', time: '2h' },
+    { name: 'Lucas Ferreira',avatar: 'https://i.pravatar.cc/150?img=8',  text: 'Quando vai postar mais?', time: '1d' },
+  ];
+
+  /* ===== ESTADO ===== */
+  let currentUser = null;
+  let posts = JSON.parse(JSON.stringify(DEMO_POSTS));
+  let registeredUsers = [...USERS_DB];
+  let postIdCounter = 200;
+
+  /* ===== UTILITÁRIOS ===== */
+  function getUserById(id) {
+    return registeredUsers.find(u => u.id === id) || { name: 'Usuário', handle: 'usuario', avatar: 'https://i.pravatar.cc/150?img=1' };
+  }
+
+  function timeAgo() {
+    return 'agora mesmo';
+  }
+
+  function showToast(msg, type = 'success') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> ${msg}`;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  /* ===== AUTH ===== */
+  function switchTab(tab) {
+    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+    document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+    document.getElementById('form-login').style.display    = tab === 'login'    ? 'flex' : 'none';
+    document.getElementById('form-register').style.display = tab === 'register' ? 'flex' : 'none';
+  }
+
+  function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const pass  = document.getElementById('login-password').value;
+    const err   = document.getElementById('login-error');
+
+    const user = registeredUsers.find(u => u.email === email && u.password === pass);
+    if (!user) {
+      err.textContent = 'E-mail ou senha inválidos. Tente: ana@demo.com / 123456';
+      err.style.display = 'block';
+      return;
+    }
+    err.style.display = 'none';
+    currentUser = user;
+    initApp();
+  }
+
+  function doRegister() {
+    const name  = document.getElementById('reg-name').value.trim();
+    const uname = document.getElementById('reg-user').value.trim().replace('@', '');
+    const email = document.getElementById('reg-email').value.trim();
+    const pass  = document.getElementById('reg-password').value;
+    const err   = document.getElementById('reg-error');
+
+    if (!name || !uname || !email || !pass) {
+      err.textContent = 'Preencha todos os campos.';
+      err.style.display = 'block';
+      return;
+    }
+    if (pass.length < 6) {
+      err.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+      err.style.display = 'block';
+      return;
+    }
+    if (registeredUsers.find(u => u.email === email)) {
+      err.textContent = 'Este e-mail já está cadastrado.';
+      err.style.display = 'block';
+      return;
+    }
+
+    const avatarId = Math.floor(Math.random() * 70) + 1;
+    const newUser = {
+      id: Date.now(),
+      name, handle: uname, email, password: pass,
+      avatar: `https://i.pravatar.cc/150?img=${avatarId}`
+    };
+    registeredUsers.push(newUser);
+    currentUser = newUser;
+    err.style.display = 'none';
+    initApp();
+  }
+
+  function doLogout() {
+    currentUser = null;
+    document.getElementById('app-screen').style.display = 'none';
+    document.getElementById('auth-screen').style.display = 'flex';
+    showToast('Você saiu da conta.', 'success');
+  }
+
+  /* ===== INIT APP ===== */
+  function initApp() {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display  = 'block';
+
+    // Atualiza avatares
+    const av = currentUser.avatar;
+    document.getElementById('nav-avatar-img').src  = av;
+    document.getElementById('create-avatar').src   = av;
+    document.getElementById('mini-avatar').src     = av;
+    document.getElementById('modal-avatar').src    = av;
+
+    document.getElementById('mini-name').textContent   = currentUser.name;
+    document.getElementById('mini-handle').textContent = '@' + currentUser.handle;
+    document.getElementById('modal-name').textContent  = currentUser.name;
+    document.getElementById('modal-handle').textContent = '@' + currentUser.handle;
+
+    renderStories();
+    renderPosts();
+    renderSuggestions();
+    renderTrending();
+    renderNotifications();
+    renderMessages();
+
+    showToast(`Bem-vindo(a), ${currentUser.name}! 🎉`, 'success');
+  }
+
+  /* ===== STORIES ===== */
+  function renderStories() {
+    const row = document.getElementById('stories-row');
+    // Mantém o botão "Seu story" (primeiro filho)
+    while (row.children.length > 1) row.removeChild(row.lastChild);
+
+    STORIES_DATA.forEach(s => {
+      const el = document.createElement('div');
+      el.className = 'story-item';
+      el.innerHTML = `
+        <div class="story-ring ${s.seen ? 'seen' : ''}">
+          <img src="${s.avatar}" alt="${s.name}" />
+        </div>
+        <span class="story-name">${s.name}</span>
+      `;
+      el.onclick = () => {
+        s.seen = true;
+        el.querySelector('.story-ring').classList.add('seen');
+        showToast(`Story de ${s.name} visualizado!`, 'success');
+      };
+      row.appendChild(el);
+    });
+  }
+
+  /* ===== POSTS ===== */
+  function renderPosts(list) {
+    const container = document.getElementById('posts-container');
+    container.innerHTML = '';
+    const toRender = list || posts;
+
+    if (toRender.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div class="e-icon">📭</div><p>Nenhum post encontrado.</p></div>`;
+      return;
+    }
+
+    toRender.forEach(post => {
+      const user = getUserById(post.userId);
+      const card = document.createElement('div');
+      card.className = 'post-card';
+      card.id = `post-${post.id}`;
+
+      const tagsHTML = (post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('');
+      const imgHTML  = post.image ? `<img class="post-image" src="${post.image}" alt="Imagem do post" loading="lazy" />` : '';
+      const commentsHTML = (post.comments || []).map(c => commentHTML(c)).join('');
+
+      card.innerHTML = `
+        <div class="post-header">
+          <div class="avatar-wrap">
+            <img class="avatar" src="${user.avatar}" alt="${user.name}" />
+            <span class="online-dot"></span>
+          </div>
+          <div class="post-user-info">
+            <div class="name">${user.name}</div>
+            <div class="meta">@${user.handle} · ${post.time}</div>
+          </div>
+          <button class="post-menu" onclick="showToast('Opções em breve!', 'success')">⋯</button>
+        </div>
+        <div class="post-content">${post.text}</div>
+        ${tagsHTML}
+        ${imgHTML}
+        <div class="post-actions">
+          <button class="action-btn ${post.liked ? 'liked' : ''}" onclick="toggleLike(${post.id}, this)">
+            <span class="heart">${post.liked ? '❤️' : '🤍'}</span>
+            <span class="like-count">${post.likes}</span>
+          </button>
+          <button class="action-btn" onclick="toggleComments(${post.id})">
+            💬 <span>${post.comments.length}</span>
+          </button>
+          <button class="action-btn" onclick="sharePost(${post.id}, this)">
+            🔁 <span class="share-count">${post.shares}</span>
+          </button>
+          <button class="action-btn" onclick="savePost(${post.id})">
+            🔖
+          </button>
+        </div>
+        <div class="comments-section" id="comments-${post.id}">
+          <div class="comments-list" id="clist-${post.id}">${commentsHTML}</div>
+          <div class="comment-input-row">
+            <img class="avatar-sm" src="${currentUser ? currentUser.avatar : ''}" alt="Você" />
+            <input type="text" placeholder="Escreva um comentário..." id="cinput-${post.id}"
+              onkeydown="if(event.key==='Enter') addComment(${post.id})" />
+            <button class="send-btn" onclick="addComment(${post.id})">➤</button>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+
+    updatePostCount();
+  }
+
+  function commentHTML(c) {
+    return `
+      <div class="comment-item">
+        <img class="avatar-sm" src="${c.avatar}" alt="${c.user}" />
+        <div class="comment-bubble">
+          <div class="c-name">${c.user}</div>
+          <div class="c-text">${c.text}</div>
+          <div class="c-time">${c.time}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function toggleLike(postId, btn) {
+    const post = posts.find(p => p.id === postId);
+    if (!post) return;
+    post.liked = !post.liked;
+    post.likes += post.liked ? 1 : -1;
+    btn.classList.toggle('liked', post.liked);
+    btn.querySelector('.heart').textContent = post.liked ? '❤️' : '🤍';
+    btn.querySelector('.like-count').textContent = post.likes;
+    if (post.liked) showToast('Post curtido! ❤️', 'success');
+  }
+
+  function toggleComments(postId) {
+    const section = document.getElementById(`comments-${postId}`);
+    section.classList.toggle('open');
+  }
+
+  function addComment(postId) {
+    const input = document.getElementById(`cinput-${postId}`);
+    const text  = input.value.trim();
+    if (!text) return;
+
+    const comment = {
+      user:   currentUser.name,
+      avatar: currentUser.avatar,
+      text,
+      time:   'agora mesmo'
+    };
+
+    const post = posts.find(p => p.id === postId);
+    post.comments.push(comment);
+
+    const list = document.getElementById(`clist-${postId}`);
+    const div  = document.createElement('div');
+    div.innerHTML = commentHTML(comment);
+    list.appendChild(div.firstElementChild);
+
+    // Atualiza contador
+    const card = document.getElementById(`post-${postId}`);
+    const countEl = card.querySelectorAll('.action-btn')[1].querySelector('span');
+    countEl.textContent = post.comments.length;
+
+    input.value = '';
+    showToast('Comentário adicionado!', 'success');
+  }
+
+  function sharePost(postId, btn) {
+    const post = posts.find(p => p.id === postId);
+    post.shares++;
+    btn.querySelector('.share-count').textContent = post.shares;
+    showToast('Post compartilhado! 🔁', 'success');
+  }
+
+  function savePost(postId) {
+    showToast('Post salvo nos favoritos! 🔖', 'success');
+  }
+
+  function createPost() {
+    const textarea = document.getElementById('post-textarea');
+    const text = textarea.value.trim();
+    if (!text) {
+      showToast('Escreva algo antes de publicar!', 'error');
+      return;
+    }
+
+    const newPost = {
+      id:       ++postIdCounter,
+      userId:   currentUser.id,
+      text,
+      tags:     [],
+      image:    null,
+      likes:    0,
+      comments: [],
+      shares:   0,
+      time:     'agora mesmo',
+      liked:    false
+    };
+
+    posts.unshift(newPost);
+    textarea.value = '';
+    renderPosts();
+    showToast('Post publicado com sucesso! 🚀', 'success');
+  }
+
+  function updatePostCount() {
+    const myPosts = posts.filter(p => p.userId === currentUser.id).length;
+    document.getElementById('stat-posts').textContent  = myPosts;
+    document.getElementById('modal-posts').textContent = myPosts;
+  }
+
+  /* ===== SUGESTÕES ===== */
+  function renderSuggestions() {
+    const list = document.getElementById('suggestions-list');
+    list.innerHTML = '';
+    SUGGESTIONS.forEach(s => {
+      const div = document.createElement('div');
+      div.className = 'suggestion-item';
+      div.innerHTML = `
+        <img class="avatar-sm" src="${s.avatar}" alt="${s.name}" style="width:40px;height:40px;" />
+        <div class="suggestion-info">
+          <div class="s-name">${s.name}</div>
+          <div class="s-meta">${s.meta}</div>
+        </div>
+        <button class="btn-follow" id="follow-${s.id}" onclick="toggleFollow(${s.id}, this)">Seguir</button>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  function toggleFollow(id, btn) {
+    const following = btn.classList.toggle('following');
+    btn.textContent = following ? 'Seguindo' : 'Seguir';
+    const user = SUGGESTIONS.find(s => s.id === id);
+    showToast(following ? `Você está seguindo ${user.name}!` : `Você deixou de seguir ${user.name}.`, 'success');
+  }
+
+  /* ===== TRENDING ===== */
+  function renderTrending() {
+    const list = document.getElementById('trending-list');
+    list.innerHTML = '';
+    TRENDING.forEach((t, i) => {
+      const div = document.createElement('div');
+      div.className = 'trend-item';
+      div.innerHTML = `
+        <span class="t-num">${i + 1}</span>
+        <div class="t-info">
+          <div class="t-tag">${t.tag}</div>
+          <div class="t-count">${t.count}</div>
+        </div>
+        <span>🔥</span>
+      `;
+      div.onclick = () => {
+        document.getElementById('post-textarea').value = `${t.tag} `;
+        document.getElementById('post-textarea').focus();
+        showToast(`Tendência ${t.tag} selecionada!`, 'success');
+      };
+      list.appendChild(div);
+    });
+  }
+
+  /* ===== NOTIFICAÇÕES ===== */
+  function renderNotifications() {
+    const list = document.getElementById('notif-list');
+    list.innerHTML = '';
+    NOTIFICATIONS.forEach(n => {
+      const div = document.createElement('div');
+      div.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:10px;';
+      div.innerHTML = `
+        <span style="font-size:20px;">${n.icon}</span>
+        <div style="flex:1;">
+          <div style="font-size:.88rem;" >${n.text}</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:3px;">${n.time}</div>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  function openNotifications() {
+    document.getElementById('notif-badge').style.display = 'none';
+    openModal('notif-modal');
+  }
+
+  /* ===== MENSAGENS ===== */
+  function renderMessages() {
+    const list = document.getElementById('msg-list');
+    list.innerHTML = '';
+    MESSAGES.forEach(m => {
+      const div = document.createElement('div');
+      div.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:10px;cursor:pointer;transition:background .2s;';
+      div.onmouseover = () => div.style.background = 'var(--border)';
+      div.onmouseout  = () => div.style.background = 'var(--surface2)';
+      div.innerHTML = `
+        <div class="avatar-wrap">
+          <img class="avatar-sm" src="${m.avatar}" alt="${m.name}" style="width:42px;height:42px;" />
+          <span class="online-dot"></span>
+        </div>
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:.9rem;">${m.name}</div>
+          <div style="font-size:.8rem;color:var(--muted);margin-top:2px;">${m.text}</div>
+        </div>
+        <span style="font-size:.75rem;color:var(--muted);">${m.time}</span>
+      `;
+      div.onclick = () => showToast(`Chat com ${m.name} em breve!`, 'success');
+      list.appendChild(div);
+    });
+  }
+
+  function openMessages() {
+    document.getElementById('msg-badge').style.display = 'none';
+    openModal('msg-modal');
+  }
+
+  /* ===== PERFIL ===== */
+  function openProfile() {
+    openModal('profile-modal');
+  }
+
+  /* ===== BUSCA ===== */
+  function handleSearch(val) {
+    const q = val.toLowerCase().trim();
+    if (!q) { renderPosts(); return; }
+    const filtered = posts.filter(p =>
+      p.text.toLowerCase().includes(q) ||
+      (p.tags || []).some(t => t.toLowerCase().includes(q)) ||
+      getUserById(p.userId).name.toLowerCase().includes(q)
+    );
+    renderPosts(filtered);
+  }
+
+  /* ===== SIDEBAR ===== */
+  function setActive(el, section) {
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    if (section === 'notifications') { openNotifications(); return; }
+    if (section === 'messages')      { openMessages(); return; }
+    if (section !== 'home' && section !== 'explore') {
+      showToast(`Seção "${section}" em breve!`, 'success');
+    }
+  }
+
+  /* ===== FECHAR MODAL AO CLICAR FORA ===== */
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+  });
+
+  /* ===== ENTER NO LOGIN ===== */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const loginForm = document.getElementById('form-login');
+      if (loginForm.style.display !== 'none') doLogin();
+    }
+  });
+</script>
+</body>
+</html>
