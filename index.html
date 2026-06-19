@@ -1225,80 +1225,37 @@
 <!-- ==================== JAVASCRIPT ==================== -->
 <script>
   /* ===== DADOS SIMULADOS ===== */
-  const USERS_DB = [
-    { id: 1, name: 'Ana Lima',     handle: 'analima',   email: 'ana@demo.com',   password: '123456', avatar: 'https://i.pravatar.cc/150?img=47', bio: 'Amante de design e criatividade ✨' },
-    { id: 2, name: 'Carlos Melo',  handle: 'carlosmelo',email: 'carlos@demo.com',password: '123456', avatar: 'https://i.pravatar.cc/150?img=12', bio: 'Desenvolvedor apaixonado por tecnologia 💻' },
-    { id: 3, name: 'Beatriz Souza',handle: 'beasouza',  email: 'bea@demo.com',   password: '123456', avatar: 'https://i.pravatar.cc/150?img=32', bio: 'Leitora e entusiasta de IA 📚' },
-  ];
+  const USERS_DB = [];
 
-  const DEMO_POSTS = [
-    {
-      id: 101, userId: 2, text: 'Acabei de terminar meu novo projeto de design! 🎨 Foram semanas de trabalho intenso, mas o resultado ficou incrível. O que vocês acham?',
-      tags: ['#design', '#criatividade'],
-      likes: 142, comments: [], shares: 18, time: '2h atrás', liked: false
-    },
-    {
-      id: 102, userId: 3, text: 'Bom dia, ConnectHub! ☀️ Começando a semana com muito café e boas energias. Qual é o ritual de manhã de vocês?',
-      tags: ['#bomdia', '#café'],
-      likes: 87, comments: [], shares: 5, time: '4h atrás', liked: false
-    },
-    {
-      id: 103, userId: 2, text: 'Dica de hoje: nunca subestime o poder de uma boa noite de sono. Produtividade nas alturas depois de dormir 8h! 💤',
-      tags: ['#produtividade', '#saúde'],
-      likes: 213, comments: [], shares: 42, time: '1d atrás', liked: false
-    },
-    {
-      id: 104, userId: 3, text: 'Acabei de ler um livro incrível sobre inteligência artificial. Recomendo demais para quem quer entender o futuro da tecnologia! 📚🤖',
-      tags: ['#IA', '#tecnologia', '#leitura'],
-      likes: 56, comments: [], shares: 11, time: '2d atrás', liked: false
-    },
-  ];
+  const DEMO_POSTS = [];
 
-  const DEMO_COMMENTS = [
-    { user: 'Carlos Melo', avatar: 'https://i.pravatar.cc/150?img=12', text: 'Que incrível! Parabéns pelo trabalho 🔥', time: '1h atrás' },
-    { user: 'Beatriz Souza', avatar: 'https://i.pravatar.cc/150?img=32', text: 'Adorei! Pode compartilhar mais detalhes?', time: '45min atrás' },
-  ];
+  const DEMO_COMMENTS = [];
 
-  const SUGGESTIONS = [
-    { id: 4, name: 'Lucas Ferreira', handle: 'lucasf',   avatar: 'https://i.pravatar.cc/150?img=8',  meta: '32 amigos em comum' },
-    { id: 5, name: 'Marina Costa',  handle: 'marinac',  avatar: 'https://i.pravatar.cc/150?img=25', meta: 'Segue você' },
-    { id: 6, name: 'Rafael Nunes',  handle: 'rafanunes', avatar: 'https://i.pravatar.cc/150?img=15', meta: '5 amigos em comum' },
-  ];
+  const SUGGESTIONS = [];
 
   const TRENDING = [
-    { tag: '#ConnectHub', count: '12.4k posts' },
-    { tag: '#Tecnologia', count: '8.9k posts' },
-    { tag: '#Design',     count: '6.1k posts' },
-    { tag: '#IA',         count: '5.7k posts' },
-    { tag: '#Brasil',     count: '4.2k posts' },
+    { tag: '#ConnectHub', count: '0 posts' },
+    { tag: '#Tecnologia', count: '0 posts' },
+    { tag: '#Design',     count: '0 posts' },
+    { tag: '#Inovação',   count: '0 posts' },
+    { tag: '#Brasil',     count: '0 posts' },
   ];
 
-  const STORIES_DATA = [
-    { name: 'Carlos',  avatar: 'https://i.pravatar.cc/150?img=12', seen: false },
-    { name: 'Beatriz', avatar: 'https://i.pravatar.cc/150?img=32', seen: false },
-    { name: 'Lucas',   avatar: 'https://i.pravatar.cc/150?img=8',  seen: true  },
-    { name: 'Marina',  avatar: 'https://i.pravatar.cc/150?img=25', seen: false },
-    { name: 'Rafael',  avatar: 'https://i.pravatar.cc/150?img=15', seen: true  },
-  ];
+  const STORIES_DATA = [];
 
-  const NOTIFICATIONS = [
-    { icon: '❤️', text: '<b>Carlos Melo</b> curtiu sua publicação.', time: '5min atrás' },
-    { icon: '💬', text: '<b>Beatriz Souza</b> comentou: "Incrível!"', time: '20min atrás' },
-    { icon: '👤', text: '<b>Lucas Ferreira</b> começou a seguir você.', time: '1h atrás' },
-    { icon: '🔁', text: '<b>Marina Costa</b> compartilhou seu post.', time: '3h atrás' },
-  ];
+  const NOTIFICATIONS = [];
 
-  const MESSAGES = [
-    { name: 'Carlos Melo',   avatar: 'https://i.pravatar.cc/150?img=12', text: 'Oi! Tudo bem?', time: '10min' },
-    { name: 'Beatriz Souza', avatar: 'https://i.pravatar.cc/150?img=32', text: 'Adorei o post!', time: '2h' },
-    { name: 'Lucas Ferreira',avatar: 'https://i.pravatar.cc/150?img=8',  text: 'Quando vai postar mais?', time: '1d' },
-  ];
+  const MESSAGES = [];
 
   /* ===== ESTADO ===== */
   let currentUser = null;
   let posts = JSON.parse(JSON.stringify(DEMO_POSTS));
   let registeredUsers = [...USERS_DB];
   let postIdCounter = 200;
+  let userFollows = {}; // { userId: [followingIds] }
+  let userFollowers = {}; // { userId: [followerIds] }
+  let conversations = {}; // { userId: { otherUserId: [messages] } }
+  let notifications = {}; // { userId: [notifications] }
 
   /* ===== UTILITÁRIOS ===== */
   function getUserById(id) {
@@ -1341,7 +1298,7 @@
 
     const user = registeredUsers.find(u => u.email === email && u.password === pass);
     if (!user) {
-      err.textContent = 'E-mail ou senha inválidos. Tente: ana@demo.com / 123456';
+      err.textContent = 'E-mail ou senha inválidos. Nenhum usuário registrado ainda. Crie uma conta!';
       err.style.display = 'block';
       return;
     }
@@ -1381,6 +1338,10 @@
       bio: 'Bem-vindo ao ConnectHub! 🌐'
     };
     registeredUsers.push(newUser);
+    userFollows[newUser.id] = [];
+    userFollowers[newUser.id] = [];
+    conversations[newUser.id] = {};
+    notifications[newUser.id] = [];
     currentUser = newUser;
     err.style.display = 'none';
     initApp();
@@ -1616,26 +1577,78 @@
   function renderSuggestions() {
     const list = document.getElementById('suggestions-list');
     list.innerHTML = '';
-    SUGGESTIONS.forEach(s => {
+    
+    // Mostra todos os usuários registrados, exceto o usuário atual
+    const otherUsers = registeredUsers.filter(u => u.id !== currentUser.id);
+    
+    if (otherUsers.length === 0) {
+      list.innerHTML = '<div style="color:var(--muted);font-size:.9rem;text-align:center;padding:20px;">Nenhum usuário para seguir ainda.</div>';
+      return;
+    }
+    
+    otherUsers.forEach(user => {
+      const isFollowing = userFollows[currentUser.id]?.includes(user.id) || false;
+      const followerCount = userFollowers[user.id]?.length || 0;
+      
       const div = document.createElement('div');
       div.className = 'suggestion-item';
       div.innerHTML = `
-        <img class="avatar-sm" src="${s.avatar}" alt="${s.name}" style="width:40px;height:40px;" />
+        <img class="avatar-sm" src="${user.avatar}" alt="${user.name}" style="width:40px;height:40px;cursor:pointer;" onclick="viewUserProfile(${user.id})" />
         <div class="suggestion-info">
-          <div class="s-name">${s.name}</div>
-          <div class="s-meta">${s.meta}</div>
+          <div class="s-name" style="cursor:pointer;" onclick="viewUserProfile(${user.id})">${user.name}</div>
+          <div class="s-meta">${followerCount} seguidor${followerCount !== 1 ? 'es' : ''}</div>
         </div>
-        <button class="btn-follow" id="follow-${s.id}" onclick="toggleFollow(${s.id}, this)">Seguir</button>
+        <button class="btn-follow ${isFollowing ? 'following' : ''}" id="follow-${user.id}" onclick="toggleFollow(${user.id}, this)">${isFollowing ? 'Seguindo' : 'Seguir'}</button>
       `;
       list.appendChild(div);
     });
   }
 
-  function toggleFollow(id, btn) {
-    const following = btn.classList.toggle('following');
-    btn.textContent = following ? 'Seguindo' : 'Seguir';
-    const user = SUGGESTIONS.find(s => s.id === id);
-    showToast(following ? `Você está seguindo ${user.name}!` : `Você deixou de seguir ${user.name}.`, 'success');
+  function toggleFollow(userId, btn) {
+    const isFollowing = userFollows[currentUser.id]?.includes(userId) || false;
+    const user = registeredUsers.find(u => u.id === userId);
+    
+    if (isFollowing) {
+      // Deixar de seguir
+      userFollows[currentUser.id] = userFollows[currentUser.id].filter(id => id !== userId);
+      userFollowers[userId] = userFollowers[userId].filter(id => id !== currentUser.id);
+      btn.classList.remove('following');
+      btn.textContent = 'Seguir';
+      showToast(`Você deixou de seguir ${user.name}.`, 'success');
+    } else {
+      // Seguir
+      userFollows[currentUser.id].push(userId);
+      userFollowers[userId].push(currentUser.id);
+      btn.classList.add('following');
+      btn.textContent = 'Seguindo';
+      showToast(`Você está seguindo ${user.name}! ✨`, 'success');
+      
+      // Adicionar notificação
+      if (!notifications[userId]) notifications[userId] = [];
+      notifications[userId].push({
+        icon: '👤',
+        text: `<b>${currentUser.name}</b> começou a seguir você.`,
+        time: 'agora mesmo'
+      });
+    }
+    
+    renderSuggestions();
+    updateFollowStats();
+  }
+  
+  function updateFollowStats() {
+    const followingCount = userFollows[currentUser.id]?.length || 0;
+    const followersCount = userFollowers[currentUser.id]?.length || 0;
+    
+    // Atualizar no mini perfil
+    const statsElements = document.querySelectorAll('.profile-stats');
+    statsElements.forEach(statsEl => {
+      const stats = statsEl.querySelectorAll('.stat');
+      if (stats.length >= 2) {
+        stats[1].querySelector('.n').textContent = followingCount;
+        stats[2].querySelector('.n').textContent = followersCount;
+      }
+    });
   }
 
   /* ===== TRENDING ===== */
@@ -1666,7 +1679,14 @@
   function renderNotifications() {
     const list = document.getElementById('notif-list');
     list.innerHTML = '';
-    NOTIFICATIONS.forEach(n => {
+    const userNotifs = notifications[currentUser.id] || [];
+    
+    if (userNotifs.length === 0) {
+      list.innerHTML = '<div style="color:var(--muted);font-size:.9rem;text-align:center;padding:20px;">Nenhuma notificação ainda.</div>';
+      return;
+    }
+    
+    userNotifs.forEach(n => {
       const div = document.createElement('div');
       div.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:10px;';
       div.innerHTML = `
@@ -1682,6 +1702,7 @@
 
   function openNotifications() {
     document.getElementById('notif-badge').style.display = 'none';
+    renderNotifications();
     openModal('notif-modal');
   }
 
@@ -1689,30 +1710,213 @@
   function renderMessages() {
     const list = document.getElementById('msg-list');
     list.innerHTML = '';
-    MESSAGES.forEach(m => {
+    
+    // Mostra todos os usuários registrados para enviar mensagens
+    const otherUsers = registeredUsers.filter(u => u.id !== currentUser.id);
+    
+    if (otherUsers.length === 0) {
+      list.innerHTML = '<div style="color:var(--muted);font-size:.9rem;text-align:center;padding:20px;">Nenhum usuário para conversar ainda.</div>';
+      return;
+    }
+    
+    otherUsers.forEach(user => {
       const div = document.createElement('div');
       div.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:10px;cursor:pointer;transition:background .2s;';
       div.onmouseover = () => div.style.background = 'var(--border)';
       div.onmouseout  = () => div.style.background = 'var(--surface2)';
       div.innerHTML = `
         <div class="avatar-wrap">
-          <img class="avatar-sm" src="${m.avatar}" alt="${m.name}" style="width:42px;height:42px;" />
+          <img class="avatar-sm" src="${user.avatar}" alt="${user.name}" style="width:42px;height:42px;" />
           <span class="online-dot"></span>
         </div>
         <div style="flex:1;">
-          <div style="font-weight:700;font-size:.9rem;">${m.name}</div>
-          <div style="font-size:.8rem;color:var(--muted);margin-top:2px;">${m.text}</div>
+          <div style="font-weight:700;font-size:.9rem;">${user.name}</div>
+          <div style="font-size:.8rem;color:var(--muted);margin-top:2px;">Clique para conversar</div>
         </div>
-        <span style="font-size:.75rem;color:var(--muted);">${m.time}</span>
       `;
-      div.onclick = () => showToast(`Chat com ${m.name} em breve!`, 'success');
+      div.onclick = () => openChatModal(user.id, user.name, user.avatar);
       list.appendChild(div);
     });
   }
 
   function openMessages() {
     document.getElementById('msg-badge').style.display = 'none';
+    renderMessages();
     openModal('msg-modal');
+  }
+  
+  function openChatModal(userId, userName, userAvatar) {
+    closeModal('msg-modal');
+    
+    // Criar modal de chat temporário
+    const chatHTML = `
+      <div class="modal-overlay" id="chat-modal-temp" style="display:flex;">
+        <div class="modal" style="max-width:500px;">
+          <div class="modal-header">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <img src="${userAvatar}" alt="${userName}" style="width:36px;height:36px;border-radius:50%;" />
+              <div>
+                <h2 style="margin:0;font-size:1rem;">${userName}</h2>
+              </div>
+            </div>
+            <button class="modal-close" onclick="closeChatModal()">✕</button>
+          </div>
+          
+          <div id="chat-messages" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;max-height:300px;overflow-y:auto;padding:10px;background:var(--surface2);border-radius:10px;">
+            <div style="color:var(--muted);text-align:center;font-size:.9rem;">Nenhuma mensagem ainda. Seja o primeiro a escrever!</div>
+          </div>
+          
+          <div style="display:flex;gap:10px;">
+            <input type="text" id="chat-input" placeholder="Escreva uma mensagem..." class="form-input" style="flex:1;" />
+            <button onclick="sendMessage(${userId}, '${userName}')" class="btn-save" style="flex:0;padding:10px 20px;">Enviar</button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', chatHTML);
+    document.getElementById('chat-modal-temp').addEventListener('click', (e) => {
+      if (e.target.id === 'chat-modal-temp') closeChatModal();
+    });
+    
+    // Carregar mensagens existentes
+    loadChatMessages(userId);
+    document.getElementById('chat-input').focus();
+  }
+  
+  function loadChatMessages(userId) {
+    const messagesDiv = document.getElementById('chat-messages');
+    const conv = conversations[currentUser.id][userId] || [];
+    
+    if (conv.length === 0) {
+      messagesDiv.innerHTML = '<div style="color:var(--muted);text-align:center;font-size:.9rem;">Nenhuma mensagem ainda. Seja o primeiro a escrever!</div>';
+      return;
+    }
+    
+    messagesDiv.innerHTML = '';
+    conv.forEach(msg => {
+      const isOwn = msg.senderId === currentUser.id;
+      const msgEl = document.createElement('div');
+      msgEl.style.cssText = `
+        display:flex;
+        ${isOwn ? 'justify-content:flex-end;' : 'justify-content:flex-start;'}
+        margin-bottom:8px;
+      `;
+      msgEl.innerHTML = `
+        <div style="
+          background:${isOwn ? 'var(--accent)' : 'var(--border)'};
+          color:#fff;
+          padding:10px 14px;
+          border-radius:10px;
+          max-width:70%;
+          word-wrap:break-word;
+          font-size:.9rem;
+        ">${msg.text}</div>
+      `;
+      messagesDiv.appendChild(msgEl);
+    });
+    
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+  
+  function sendMessage(recipientId, recipientName) {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    
+    if (!text) return;
+    
+    // Inicializar conversa se não existir
+    if (!conversations[currentUser.id][recipientId]) {
+      conversations[currentUser.id][recipientId] = [];
+    }
+    if (!conversations[recipientId]) conversations[recipientId] = {};
+    if (!conversations[recipientId][currentUser.id]) {
+      conversations[recipientId][currentUser.id] = [];
+    }
+    
+    const message = {
+      senderId: currentUser.id,
+      senderName: currentUser.name,
+      text,
+      time: 'agora mesmo'
+    };
+    
+    conversations[currentUser.id][recipientId].push(message);
+    conversations[recipientId][currentUser.id].push(message);
+    
+    // Adicionar notificação
+    if (!notifications[recipientId]) notifications[recipientId] = [];
+    notifications[recipientId].push({
+      icon: '💬',
+      text: `<b>${currentUser.name}</b> enviou uma mensagem.`,
+      time: 'agora mesmo'
+    });
+    
+    input.value = '';
+    loadChatMessages(recipientId);
+    showToast('Mensagem enviada! 📨', 'success');
+  }
+  
+  function closeChatModal() {
+    const modal = document.getElementById('chat-modal-temp');
+    if (modal) modal.remove();
+  }
+  
+  function viewUserProfile(userId) {
+    const user = registeredUsers.find(u => u.id === userId);
+    if (!user) return;
+    
+    const followingCount = userFollows[userId]?.length || 0;
+    const followersCount = userFollowers[userId]?.length || 0;
+    const userPosts = posts.filter(p => p.userId === userId).length;
+    
+    // Criar modal de perfil do usuário
+    const profileHTML = `
+      <div class="modal-overlay" id="user-profile-modal" style="display:flex;">
+        <div class="modal">
+          <div class="modal-header">
+            <h2>Perfil de ${user.name}</h2>
+            <button class="modal-close" onclick="closeUserProfileModal()">✕</button>
+          </div>
+          <div style="text-align:center;margin-bottom:20px;">
+            <img src="${user.avatar}" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--accent);object-fit:cover;" />
+            <div style="font-weight:800;font-size:1.2rem;margin-top:10px;">${user.name}</div>
+            <div style="color:var(--muted);font-size:.9rem;">@${user.handle}</div>
+            <div style="color:var(--text);font-size:.9rem;margin-top:8px;">${user.bio || 'Sem bio'}</div>
+          </div>
+          <div class="profile-stats" style="justify-content:center;gap:32px;">
+            <div class="stat"><div class="n">${userPosts}</div><div class="l">Posts</div></div>
+            <div class="stat"><div class="n">${followingCount}</div><div class="l">Seguindo</div></div>
+            <div class="stat"><div class="n">${followersCount}</div><div class="l">Seguidores</div></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:20px;">
+            <button class="btn-primary" style="flex:1;" onclick="toggleFollowFromProfile(${userId})">Seguir</button>
+            <button class="btn-primary" style="flex:1;" onclick="openChatFromProfile(${userId}, '${user.name}', '${user.avatar}')">Mensagem</button>
+          </div>
+          <button class="btn-cancel" style="width:100%;margin-top:10px;" onclick="closeUserProfileModal()">Fechar</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', profileHTML);
+    document.getElementById('user-profile-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'user-profile-modal') closeUserProfileModal();
+    });
+  }
+  
+  function closeUserProfileModal() {
+    const modal = document.getElementById('user-profile-modal');
+    if (modal) modal.remove();
+  }
+  
+  function toggleFollowFromProfile(userId) {
+    const btn = event.target;
+    toggleFollow(userId, btn);
+  }
+  
+  function openChatFromProfile(userId, userName, userAvatar) {
+    closeUserProfileModal();
+    openChatModal(userId, userName, userAvatar);
   }
 
   /* ===== PERFIL ===== */
