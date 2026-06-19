@@ -428,14 +428,6 @@
 
     .post-content { font-size: .95rem; line-height: 1.6; margin-bottom: 14px; }
 
-    .post-image {
-      width: 100%;
-      border-radius: 10px;
-      margin-bottom: 14px;
-      max-height: 400px;
-      object-fit: cover;
-    }
-
     .post-tag {
       display: inline-block;
       background: rgba(124,92,252,.15);
@@ -715,6 +707,8 @@
       box-shadow: var(--shadow);
       transform: scale(.95);
       transition: transform .2s;
+      max-height: 90vh;
+      overflow-y: auto;
     }
 
     .modal-overlay.open .modal { transform: scale(1); }
@@ -799,6 +793,124 @@
     }
 
     .add-story:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* SETTINGS FORM */
+    .settings-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .settings-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .settings-section label {
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .avatar-upload {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar-preview {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 3px solid var(--accent);
+      object-fit: cover;
+    }
+
+    .avatar-upload input[type="file"] {
+      display: none;
+    }
+
+    .btn-upload {
+      background: rgba(124,92,252,.15);
+      color: var(--accent);
+      border: 1px solid rgba(124,92,252,.3);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: .9rem;
+      font-weight: 600;
+      transition: all .2s;
+      cursor: pointer;
+    }
+
+    .btn-upload:hover { background: var(--accent); color: #fff; }
+
+    .form-input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .form-input:focus { border-color: var(--accent); }
+
+    .form-textarea {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .2s;
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-textarea:focus { border-color: var(--accent); }
+
+    .char-count {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .settings-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn-save {
+      flex: 1;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: .95rem;
+      font-weight: 700;
+      transition: opacity .2s;
+    }
+
+    .btn-save:hover { opacity: .9; }
+
+    .btn-cancel {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: .95rem;
+      font-weight: 700;
+      transition: all .2s;
+    }
+
+    .btn-cancel:hover { background: var(--border); }
 
     /* RESPONSIVE */
     @media (max-width: 1024px) {
@@ -916,6 +1028,9 @@
         💬
         <span class="badge" id="msg-badge">2</span>
       </button>
+      <button class="nav-btn" onclick="openSettings()" title="Configurações">
+        ⚙️
+      </button>
       <div class="avatar-wrap">
         <img class="nav-avatar" id="nav-avatar-img" src="" alt="Meu perfil" onclick="openProfile()" />
         <span class="online-dot"></span>
@@ -973,9 +1088,6 @@
         </div>
         <div class="create-post-actions">
           <div class="create-post-tools">
-            <button class="tool-btn" onclick="showToast('Adicionar foto em breve!', 'success')">📷 Foto</button>
-            <button class="tool-btn" onclick="showToast('Adicionar vídeo em breve!', 'success')">🎬 Vídeo</button>
-            <button class="tool-btn" onclick="showToast('Adicionar localização em breve!', 'success')">📍 Local</button>
           </div>
           <button class="btn-post" onclick="createPost()">Publicar</button>
         </div>
@@ -996,7 +1108,7 @@
           <img class="profile-card-avatar" id="mini-avatar" src="" alt="Avatar" />
           <div class="profile-card-name" id="mini-name">—</div>
           <div class="profile-card-handle" id="mini-handle">@—</div>
-          <div class="profile-card-bio">Explorando o mundo digital ✨</div>
+          <div class="profile-card-bio" id="mini-bio">Bio aqui</div>
           <div class="profile-stats">
             <div class="stat"><div class="n" id="stat-posts">0</div><div class="l">Posts</div></div>
             <div class="stat"><div class="n">248</div><div class="l">Seguindo</div></div>
@@ -1032,6 +1144,7 @@
       <img id="modal-avatar" src="" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--accent);object-fit:cover;" />
       <div style="font-weight:800;font-size:1.2rem;margin-top:10px;" id="modal-name">—</div>
       <div style="color:var(--muted);font-size:.9rem;" id="modal-handle">@—</div>
+      <div style="color:var(--text);font-size:.9rem;margin-top:8px;" id="modal-bio">Bio aqui</div>
     </div>
     <div class="profile-stats" style="justify-content:center;gap:32px;">
       <div class="stat"><div class="n" id="modal-posts">0</div><div class="l">Posts</div></div>
@@ -1039,6 +1152,48 @@
       <div class="stat"><div class="n">1.2k</div><div class="l">Seguidores</div></div>
     </div>
     <button class="btn-primary" style="margin-top:20px;width:100%;" onclick="closeModal('profile-modal')">Fechar</button>
+  </div>
+</div>
+
+<!-- ==================== MODAL CONFIGURAÇÕES ==================== -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Configurações de Perfil</h2>
+      <button class="modal-close" onclick="closeModal('settings-modal')">✕</button>
+    </div>
+    <form class="settings-form" onsubmit="saveSettings(event)">
+      <!-- FOTO DE PERFIL -->
+      <div class="settings-section">
+        <label>Foto de Perfil</label>
+        <div class="avatar-upload">
+          <img id="settings-avatar-preview" class="avatar-preview" src="" alt="Foto de perfil" />
+          <input type="file" id="avatar-file-input" accept="image/*" onchange="previewAvatar(this)" />
+          <button type="button" class="btn-upload" onclick="document.getElementById('avatar-file-input').click()">
+            Alterar Foto
+          </button>
+        </div>
+      </div>
+
+      <!-- NOME -->
+      <div class="settings-section">
+        <label>Nome</label>
+        <input type="text" id="settings-name" class="form-input" placeholder="Seu nome completo" maxlength="50" />
+      </div>
+
+      <!-- BIO -->
+      <div class="settings-section">
+        <label>Bio</label>
+        <textarea id="settings-bio" class="form-textarea" placeholder="Conte um pouco sobre você..." maxlength="150"></textarea>
+        <div class="char-count"><span id="bio-char-count">0</span>/150</div>
+      </div>
+
+      <!-- BOTÕES -->
+      <div class="settings-actions">
+        <button type="button" class="btn-cancel" onclick="closeModal('settings-modal')">Cancelar</button>
+        <button type="submit" class="btn-save">Salvar Alterações</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -1071,30 +1226,30 @@
 <script>
   /* ===== DADOS SIMULADOS ===== */
   const USERS_DB = [
-    { id: 1, name: 'Ana Lima',     handle: 'analima',   email: 'ana@demo.com',   password: '123456', avatar: 'https://i.pravatar.cc/150?img=47' },
-    { id: 2, name: 'Carlos Melo',  handle: 'carlosmelo',email: 'carlos@demo.com',password: '123456', avatar: 'https://i.pravatar.cc/150?img=12' },
-    { id: 3, name: 'Beatriz Souza',handle: 'beasouza',  email: 'bea@demo.com',   password: '123456', avatar: 'https://i.pravatar.cc/150?img=32' },
+    { id: 1, name: 'Ana Lima',     handle: 'analima',   email: 'ana@demo.com',   password: '123456', avatar: 'https://i.pravatar.cc/150?img=47', bio: 'Amante de design e criatividade ✨' },
+    { id: 2, name: 'Carlos Melo',  handle: 'carlosmelo',email: 'carlos@demo.com',password: '123456', avatar: 'https://i.pravatar.cc/150?img=12', bio: 'Desenvolvedor apaixonado por tecnologia 💻' },
+    { id: 3, name: 'Beatriz Souza',handle: 'beasouza',  email: 'bea@demo.com',   password: '123456', avatar: 'https://i.pravatar.cc/150?img=32', bio: 'Leitora e entusiasta de IA 📚' },
   ];
 
   const DEMO_POSTS = [
     {
       id: 101, userId: 2, text: 'Acabei de terminar meu novo projeto de design! 🎨 Foram semanas de trabalho intenso, mas o resultado ficou incrível. O que vocês acham?',
-      tags: ['#design', '#criatividade'], image: 'https://picsum.photos/seed/post1/600/350',
+      tags: ['#design', '#criatividade'],
       likes: 142, comments: [], shares: 18, time: '2h atrás', liked: false
     },
     {
       id: 102, userId: 3, text: 'Bom dia, ConnectHub! ☀️ Começando a semana com muito café e boas energias. Qual é o ritual de manhã de vocês?',
-      tags: ['#bomdia', '#café'], image: null,
+      tags: ['#bomdia', '#café'],
       likes: 87, comments: [], shares: 5, time: '4h atrás', liked: false
     },
     {
       id: 103, userId: 2, text: 'Dica de hoje: nunca subestime o poder de uma boa noite de sono. Produtividade nas alturas depois de dormir 8h! 💤',
-      tags: ['#produtividade', '#saúde'], image: 'https://picsum.photos/seed/post3/600/350',
+      tags: ['#produtividade', '#saúde'],
       likes: 213, comments: [], shares: 42, time: '1d atrás', liked: false
     },
     {
       id: 104, userId: 3, text: 'Acabei de ler um livro incrível sobre inteligência artificial. Recomendo demais para quem quer entender o futuro da tecnologia! 📚🤖',
-      tags: ['#IA', '#tecnologia', '#leitura'], image: null,
+      tags: ['#IA', '#tecnologia', '#leitura'],
       likes: 56, comments: [], shares: 11, time: '2d atrás', liked: false
     },
   ];
@@ -1147,7 +1302,7 @@
 
   /* ===== UTILITÁRIOS ===== */
   function getUserById(id) {
-    return registeredUsers.find(u => u.id === id) || { name: 'Usuário', handle: 'usuario', avatar: 'https://i.pravatar.cc/150?img=1' };
+    return registeredUsers.find(u => u.id === id) || { name: 'Usuário', handle: 'usuario', avatar: 'https://i.pravatar.cc/150?img=1', bio: '' };
   }
 
   function timeAgo() {
@@ -1222,7 +1377,8 @@
     const newUser = {
       id: Date.now(),
       name, handle: uname, email, password: pass,
-      avatar: `https://i.pravatar.cc/150?img=${avatarId}`
+      avatar: `https://i.pravatar.cc/150?img=${avatarId}`,
+      bio: 'Bem-vindo ao ConnectHub! 🌐'
     };
     registeredUsers.push(newUser);
     currentUser = newUser;
@@ -1248,11 +1404,14 @@
     document.getElementById('create-avatar').src   = av;
     document.getElementById('mini-avatar').src     = av;
     document.getElementById('modal-avatar').src    = av;
+    document.getElementById('settings-avatar-preview').src = av;
 
     document.getElementById('mini-name').textContent   = currentUser.name;
     document.getElementById('mini-handle').textContent = '@' + currentUser.handle;
+    document.getElementById('mini-bio').textContent = currentUser.bio || 'Bio aqui';
     document.getElementById('modal-name').textContent  = currentUser.name;
     document.getElementById('modal-handle').textContent = '@' + currentUser.handle;
+    document.getElementById('modal-bio').textContent = currentUser.bio || 'Bio aqui';
 
     renderStories();
     renderPosts();
@@ -1306,7 +1465,6 @@
       card.id = `post-${post.id}`;
 
       const tagsHTML = (post.tags || []).map(t => `<span class="post-tag">${t}</span>`).join('');
-      const imgHTML  = post.image ? `<img class="post-image" src="${post.image}" alt="Imagem do post" loading="lazy" />` : '';
       const commentsHTML = (post.comments || []).map(c => commentHTML(c)).join('');
 
       card.innerHTML = `
@@ -1323,7 +1481,6 @@
         </div>
         <div class="post-content">${post.text}</div>
         ${tagsHTML}
-        ${imgHTML}
         <div class="post-actions">
           <button class="action-btn ${post.liked ? 'liked' : ''}" onclick="toggleLike(${post.id}, this)">
             <span class="heart">${post.liked ? '❤️' : '🤍'}</span>
@@ -1343,8 +1500,7 @@
           <div class="comments-list" id="clist-${post.id}">${commentsHTML}</div>
           <div class="comment-input-row">
             <img class="avatar-sm" src="${currentUser ? currentUser.avatar : ''}" alt="Você" />
-            <input type="text" placeholder="Escreva um comentário..." id="cinput-${post.id}"
-              onkeydown="if(event.key==='Enter') addComment(${post.id})" />
+            <input type="text" placeholder="Escreva um comentário..." id="cinput-${post.id}" />
             <button class="send-btn" onclick="addComment(${post.id})">➤</button>
           </div>
         </div>
@@ -1437,7 +1593,6 @@
       userId:   currentUser.id,
       text,
       tags:     [],
-      image:    null,
       likes:    0,
       comments: [],
       shares:   0,
@@ -1565,6 +1720,80 @@
     openModal('profile-modal');
   }
 
+  /* ===== CONFIGURAÇÕES ===== */
+  function openSettings() {
+    document.getElementById('settings-name').value = currentUser.name;
+    document.getElementById('settings-bio').value = currentUser.bio || '';
+    updateBioCharCount();
+    openModal('settings-modal');
+  }
+
+  function previewAvatar(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('settings-avatar-preview').src = e.target.result;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function updateBioCharCount() {
+    const bioInput = document.getElementById('settings-bio');
+    const charCount = document.getElementById('bio-char-count');
+    charCount.textContent = bioInput.value.length;
+  }
+
+  function saveSettings(event) {
+    event.preventDefault();
+    
+    const name = document.getElementById('settings-name').value.trim();
+    const bio = document.getElementById('settings-bio').value.trim();
+    const avatarFile = document.getElementById('avatar-file-input').files[0];
+
+    if (!name) {
+      showToast('O nome não pode estar vazio!', 'error');
+      return;
+    }
+
+    // Atualiza nome
+    currentUser.name = name;
+    currentUser.bio = bio;
+
+    // Se houver arquivo de avatar, converte para Data URL
+    if (avatarFile) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        currentUser.avatar = e.target.result;
+        updateAllAvatars();
+        showToast('Configurações salvas com sucesso! 🎉', 'success');
+        closeModal('settings-modal');
+      };
+      reader.readAsDataURL(avatarFile);
+    } else {
+      updateAllAvatars();
+      showToast('Configurações salvas com sucesso! 🎉', 'success');
+      closeModal('settings-modal');
+    }
+  }
+
+  function updateAllAvatars() {
+    const av = currentUser.avatar;
+    document.getElementById('nav-avatar-img').src = av;
+    document.getElementById('create-avatar').src = av;
+    document.getElementById('mini-avatar').src = av;
+    document.getElementById('modal-avatar').src = av;
+    document.getElementById('settings-avatar-preview').src = av;
+    
+    document.getElementById('mini-name').textContent = currentUser.name;
+    document.getElementById('mini-bio').textContent = currentUser.bio || 'Bio aqui';
+    document.getElementById('modal-name').textContent = currentUser.name;
+    document.getElementById('modal-bio').textContent = currentUser.bio || 'Bio aqui';
+
+    // Atualiza posts do usuário atual
+    renderPosts();
+  }
+
   /* ===== BUSCA ===== */
   function handleSearch(val) {
     const q = val.toLowerCase().trim();
@@ -1600,6 +1829,14 @@
     if (e.key === 'Enter') {
       const loginForm = document.getElementById('form-login');
       if (loginForm.style.display !== 'none') doLogin();
+    }
+  });
+
+  /* ===== ATUALIZAR CONTADOR DE BIO ===== */
+  document.addEventListener('DOMContentLoaded', () => {
+    const bioInput = document.getElementById('settings-bio');
+    if (bioInput) {
+      bioInput.addEventListener('input', updateBioCharCount);
     }
   });
 </script>
