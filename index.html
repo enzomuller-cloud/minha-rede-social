@@ -1257,6 +1257,40 @@
   let conversations = {}; // { userId: { otherUserId: [messages] } }
   let notifications = {}; // { userId: [notifications] }
 
+  /* ===== INICIALIZAR DADOS DO LOCALSTORAGE ===== */
+  function initializeData() {
+    // Carregar dados do localStorage
+    const savedUsers = localStorage.getItem('connecthub_users');
+    const savedPosts = localStorage.getItem('connecthub_posts');
+    const savedFollows = localStorage.getItem('connecthub_follows');
+    const savedFollowers = localStorage.getItem('connecthub_followers');
+    const savedConversations = localStorage.getItem('connecthub_conversations');
+    const savedNotifications = localStorage.getItem('connecthub_notifications');
+    const savedPostCounter = localStorage.getItem('connecthub_postCounter');
+
+    if (savedUsers) registeredUsers = JSON.parse(savedUsers);
+    if (savedPosts) posts = JSON.parse(savedPosts);
+    if (savedFollows) userFollows = JSON.parse(savedFollows);
+    if (savedFollowers) userFollowers = JSON.parse(savedFollowers);
+    if (savedConversations) conversations = JSON.parse(savedConversations);
+    if (savedNotifications) notifications = JSON.parse(savedNotifications);
+    if (savedPostCounter) postIdCounter = parseInt(savedPostCounter);
+  }
+
+  /* ===== SALVAR DADOS NO LOCALSTORAGE ===== */
+  function saveData() {
+    localStorage.setItem('connecthub_users', JSON.stringify(registeredUsers));
+    localStorage.setItem('connecthub_posts', JSON.stringify(posts));
+    localStorage.setItem('connecthub_follows', JSON.stringify(userFollows));
+    localStorage.setItem('connecthub_followers', JSON.stringify(userFollowers));
+    localStorage.setItem('connecthub_conversations', JSON.stringify(conversations));
+    localStorage.setItem('connecthub_notifications', JSON.stringify(notifications));
+    localStorage.setItem('connecthub_postCounter', postIdCounter.toString());
+  }
+
+  // Inicializar dados ao carregar a página
+  initializeData();
+
   /* ===== UTILITÁRIOS ===== */
   function getUserById(id) {
     return registeredUsers.find(u => u.id === id) || { name: 'Usuário', handle: 'usuario', avatar: 'https://i.pravatar.cc/150?img=1', bio: '' };
@@ -1344,6 +1378,7 @@
     notifications[newUser.id] = [];
     currentUser = newUser;
     err.style.display = 'none';
+    saveData();
     initApp();
   }
 
@@ -1493,6 +1528,7 @@
     btn.classList.toggle('liked', post.liked);
     btn.querySelector('.heart').textContent = post.liked ? '❤️' : '🤍';
     btn.querySelector('.like-count').textContent = post.likes;
+    saveData();
     if (post.liked) showToast('Post curtido! ❤️', 'success');
   }
 
@@ -1527,6 +1563,7 @@
     countEl.textContent = post.comments.length;
 
     input.value = '';
+    saveData();
     showToast('Comentário adicionado!', 'success');
   }
 
@@ -1534,6 +1571,7 @@
     const post = posts.find(p => p.id === postId);
     post.shares++;
     btn.querySelector('.share-count').textContent = post.shares;
+    saveData();
     showToast('Post compartilhado! 🔁', 'success');
   }
 
@@ -1563,6 +1601,7 @@
 
     posts.unshift(newPost);
     textarea.value = '';
+    saveData();
     renderPosts();
     showToast('Post publicado com sucesso! 🚀', 'success');
   }
@@ -1614,6 +1653,7 @@
       userFollowers[userId] = userFollowers[userId].filter(id => id !== currentUser.id);
       btn.classList.remove('following');
       btn.textContent = 'Seguir';
+      saveData();
       showToast(`Você deixou de seguir ${user.name}.`, 'success');
     } else {
       // Seguir
@@ -1621,6 +1661,7 @@
       userFollowers[userId].push(currentUser.id);
       btn.classList.add('following');
       btn.textContent = 'Seguindo';
+      saveData();
       showToast(`Você está seguindo ${user.name}! ✨`, 'success');
       
       // Adicionar notificação
@@ -1853,6 +1894,7 @@
     });
     
     input.value = '';
+    saveData();
     loadChatMessages(recipientId);
     showToast('Mensagem enviada! 📨', 'success');
   }
@@ -1969,12 +2011,14 @@
       const reader = new FileReader();
       reader.onload = (e) => {
         currentUser.avatar = e.target.result;
+        saveData();
         updateAllAvatars();
         showToast('Configurações salvas com sucesso! 🎉', 'success');
         closeModal('settings-modal');
       };
       reader.readAsDataURL(avatarFile);
     } else {
+      saveData();
       updateAllAvatars();
       showToast('Configurações salvas com sucesso! 🎉', 'success');
       closeModal('settings-modal');
