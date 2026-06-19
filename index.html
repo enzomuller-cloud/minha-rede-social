@@ -1188,6 +1188,14 @@
         <div class="char-count"><span id="bio-char-count">0</span>/150</div>
       </div>
 
+      <!-- SENHA -->
+      <div class="settings-section">
+        <label>Alterar Senha</label>
+        <input type="password" id="settings-current-password" class="form-input" placeholder="Senha atual" />
+        <input type="password" id="settings-new-password" class="form-input" placeholder="Nova senha (mínimo 6 caracteres)" style="margin-top:10px;" />
+        <input type="password" id="settings-confirm-password" class="form-input" placeholder="Confirmar nova senha" style="margin-top:10px;" />
+      </div>
+
       <!-- BOTÕES -->
       <div class="settings-actions">
         <button type="button" class="btn-cancel" onclick="closeModal('settings-modal')">Cancelar</button>
@@ -1970,6 +1978,9 @@
   function openSettings() {
     document.getElementById('settings-name').value = currentUser.name;
     document.getElementById('settings-bio').value = currentUser.bio || '';
+    document.getElementById('settings-current-password').value = '';
+    document.getElementById('settings-new-password').value = '';
+    document.getElementById('settings-confirm-password').value = '';
     updateBioCharCount();
     openModal('settings-modal');
   }
@@ -1996,10 +2007,34 @@
     const name = document.getElementById('settings-name').value.trim();
     const bio = document.getElementById('settings-bio').value.trim();
     const avatarFile = document.getElementById('avatar-file-input').files[0];
+    const currentPassword = document.getElementById('settings-current-password').value;
+    const newPassword = document.getElementById('settings-new-password').value;
+    const confirmPassword = document.getElementById('settings-confirm-password').value;
 
     if (!name) {
       showToast('O nome não pode estar vazio!', 'error');
       return;
+    }
+
+    // Validar alteração de senha se os campos forem preenchidos
+    if (currentPassword || newPassword || confirmPassword) {
+      if (!currentPassword) {
+        showToast('Digite sua senha atual!', 'error');
+        return;
+      }
+      if (currentPassword !== currentUser.password) {
+        showToast('Senha atual incorreta!', 'error');
+        return;
+      }
+      if (!newPassword || newPassword.length < 6) {
+        showToast('A nova senha deve ter pelo menos 6 caracteres!', 'error');
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        showToast('As senhas não coincidem!', 'error');
+        return;
+      }
+      currentUser.password = newPassword;
     }
 
     // Atualiza nome
@@ -2013,6 +2048,9 @@
         currentUser.avatar = e.target.result;
         saveData();
         updateAllAvatars();
+        document.getElementById('settings-current-password').value = '';
+        document.getElementById('settings-new-password').value = '';
+        document.getElementById('settings-confirm-password').value = '';
         showToast('Configurações salvas com sucesso! 🎉', 'success');
         closeModal('settings-modal');
       };
@@ -2020,6 +2058,9 @@
     } else {
       saveData();
       updateAllAvatars();
+      document.getElementById('settings-current-password').value = '';
+      document.getElementById('settings-new-password').value = '';
+      document.getElementById('settings-confirm-password').value = '';
       showToast('Configurações salvas com sucesso! 🎉', 'success');
       closeModal('settings-modal');
     }
@@ -2046,12 +2087,64 @@
   function handleSearch(val) {
     const q = val.toLowerCase().trim();
     if (!q) { renderPosts(); return; }
-    const filtered = posts.filter(p =>
-      p.text.toLowerCase().includes(q) ||
-      (p.tags || []).some(t => t.toLowerCase().includes(q)) ||
-      getUserById(p.userId).name.toLowerCase().includes(q)
+    
+    // Buscar usuários que correspondem
+    const matchingUsers = registeredUsers.filter(u => 
+      u.name.toLowerCase().includes(q) || u.handle.toLowerCase().includes(q)
     );
-    renderPosts(filtered);
+    
+    // Se encontrou usuários, mostrar primeiro
+    if (matchingUsers.length > 0) {
+      const container = document.getElementById('posts-container');
+      container.innerHTML = '';
+      
+      // Criar seção de usuários encontrados
+      const usersSection = document.createElement('div');
+      usersSection.innerHTML = '<div style="padding:20px;color:var(--muted);font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">Usuários encontrados</div>';
+      
+      matchingUsers.forEach(user => {
+        const isFollowing = userFollows[currentUser.id]?.includes(user.id) || false;
+        const followerCount = userFollowers[user.id]?.length || 0;
+        
+        const userEl = document.createElement('div');
+        userEl.style.cssText = 'display:flex;align-items:center;gap:12px;padding:15px 20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin:10px 20px;cursor:pointer;transition:all .2s;';
+        userEl.onmouseover = () => userEl.style.background = 'var(--surface2)';
+        userEl.onmouseout = () => userEl.style.background = 'var(--surface)';
+        userEl.innerHTML = `
+          <img src="${user.avatar}" alt="${user.name}" style="width:50px;height:50px;border-radius:50%;object-fit:cover;cursor:pointer;" onclick="event.stopPropagation();viewUserProfile(${user.id})" />
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:.95rem;">${user.name}</div>
+            <div style="color:var(--muted);font-size:.85rem;">@${user.handle}</div>
+            <div style="color:var(--muted);font-size:.8rem;margin-top:2px;">${followerCount} seguidor${followerCount !== 1 ? 'es' : ''}</div>
+          </div>
+          <button class="btn-follow ${isFollowing ? 'following' : ''}" onclick="event.stopPropagation();toggleFollow(${user.id}, this)" style="margin-left:auto;">${isFollowing ? 'Seguindo' : 'Seguir'}</button>
+        `;
+        usersSection.appendChild(userEl);
+      });
+      
+      container.appendChild(usersSection);
+      
+      // Também mostrar posts que correspondem
+      const filtered = posts.filter(p =>
+        p.text.toLowerCase().includes(q) ||
+        (p.tags || []).some(t => t.toLowerCase().includes(q))
+      );
+      
+      if (filtered.length > 0) {
+        const postsSection = document.createElement('div');
+        postsSection.innerHTML = '<div style="padding:20px;color:var(--muted);font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:20px;">Posts encontrados</div>';
+        container.appendChild(postsSection);
+        renderPosts(filtered);
+      }
+    } else {
+      // Se não encontrou usuários, buscar apenas em posts
+      const filtered = posts.filter(p =>
+        p.text.toLowerCase().includes(q) ||
+        (p.tags || []).some(t => t.toLowerCase().includes(q)) ||
+        getUserById(p.userId).name.toLowerCase().includes(q)
+      );
+      renderPosts(filtered);
+    }
   }
 
   /* ===== SIDEBAR ===== */
